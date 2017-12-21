@@ -241,7 +241,6 @@ public class SummaryFragment extends Fragment implements DatePickerDialog.OnDate
         colors.add(Color.parseColor("#0000FF"));
         colors.add(Color.parseColor("#FF00FF"));
         colors.add(Color.parseColor("#00FFFF"));
-        colors.add(Color.parseColor("#FF00FF"));
         colors.add(Color.parseColor("#CC0000"));
         colors.add(Color.parseColor("#0000CC"));
         colors.add(Color.parseColor("#00CC00"));
