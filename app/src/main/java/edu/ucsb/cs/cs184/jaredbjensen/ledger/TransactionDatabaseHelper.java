@@ -18,7 +18,6 @@ import java.util.List;
 
 public class TransactionDatabaseHelper extends SQLiteOpenHelper {
     private static final String CreateTable = "CREATE TABLE Transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, date INTEGER NOT NULL, amount REAL NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL);";
-    private static final String CreateBalanceTable = "CREATE TABLE Balances (id INTEGER PRIMARY KEY AUTOINCREMENT, date INTEGER NOT NULL, amount REAL NOT NULL);";
     private static final String DatabaseName = "TransactionDatabase.db";
     private static TransactionDatabaseHelper Instance;
     private List<OnDatabaseChangeListener> Listeners;
@@ -78,11 +77,6 @@ public class TransactionDatabaseHelper extends SQLiteOpenHelper {
         NotifyListeners();
     }
 
-    public void update(String table, int rating, int id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE " + table + " SET Rating=" + rating + " WHERE id=" + id);
-    }
-
     public void clearDB(int startDate, int endDate) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM Transactions WHERE date >= " + startDate + "AND date <= " + endDate);
@@ -92,9 +86,7 @@ public class TransactionDatabaseHelper extends SQLiteOpenHelper {
     public void clearDB() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DROP TABLE Transactions");
-        db.execSQL("DROP TABLE Balances");
         db.execSQL(CreateTable);
-        db.execSQL(CreateBalanceTable);
         NotifyListeners();
     }
 

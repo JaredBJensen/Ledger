@@ -10,6 +10,7 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -24,7 +25,7 @@ public class TransactionsFragment extends Fragment implements DatePickerDialog.O
     View rootView;
     Button dateStart, dateEnd;
     RecyclerView recyclerView;
-    Spinner typeSpinner, categorySpinner;
+    Spinner categorySpinner;
 
     String whichPicker;
     Calendar calendar;
@@ -49,6 +50,8 @@ public class TransactionsFragment extends Fragment implements DatePickerDialog.O
     @Override
     public void onResume() {
         super.onResume();
+
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle("Transactions");
 
         dateStart = rootView.findViewById(R.id.datepicker_start_trans);
         dateEnd = rootView.findViewById(R.id.datepicker_end_trans);
@@ -79,24 +82,44 @@ public class TransactionsFragment extends Fragment implements DatePickerDialog.O
         timestampEnd = calendar.getTimeInMillis();
         dateEnd.setText(DateFormat.format(MainActivity.SIMPLE_DATE_FORMAT, calendar));
 
-        typeSpinner = rootView.findViewById(R.id.spinner_type);
-        categorySpinner = rootView.findViewById(R.id.spinner_category);
-
         ArrayList<String> types = new ArrayList<>();
         types.add("All");
         types.add("Expenses");
         types.add("Income");
 
-        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, types);
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        typeSpinner.setAdapter(typeAdapter);
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, categories);
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(categoryAdapter);
 
         recyclerView = rootView.findViewById(R.id.recycler_transactions);
 
+        TransactionDatabaseHelper.GetInstance().Subscribe(this);
+
         refreshList("WHERE date >= " + timestampStart + " AND date <= " + timestampEnd);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        categorySpinner = rootView.findViewById(R.id.spinner_category);
+
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                String category = categories.get(position);
+                if (!category.equals("All")) {
+                    refreshList("WHERE date >= " + timestampStart + " AND date <= " + timestampEnd + " AND category = '" + category + "'");
+                }
+                else refreshList("WHERE date >= " + timestampStart + " AND date <= " + timestampEnd);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+
+            }
+
+        });
     }
 
     @Override

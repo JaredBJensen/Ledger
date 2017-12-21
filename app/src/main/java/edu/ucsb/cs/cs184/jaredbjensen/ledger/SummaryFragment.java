@@ -59,6 +59,8 @@ public class SummaryFragment extends Fragment implements DatePickerDialog.OnDate
     public void onResume() {
         super.onResume();
 
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle("Financial Summary");
+
         recyclerView = rootView.findViewById(R.id.recycler_table);
 
         dateStart = rootView.findViewById(R.id.datepicker_start);
@@ -91,6 +93,8 @@ public class SummaryFragment extends Fragment implements DatePickerDialog.OnDate
         calendar.set(yearStart, monthStart, dayEnd);
         timestampEnd = calendar.getTimeInMillis();
         dateEnd.setText(DateFormat.format(MainActivity.SIMPLE_DATE_FORMAT, calendar));
+
+        TransactionDatabaseHelper.GetInstance().Subscribe(this);
 
         transactions = TransactionDatabaseHelper.GetInstance().getTransactions("WHERE date >= " + timestampStart + " AND date <= " + timestampEnd);
         setupLineChart();
@@ -158,41 +162,37 @@ public class SummaryFragment extends Fragment implements DatePickerDialog.OnDate
 
     public void setupLineChart() {
         List<Entry> entriesExpense = new ArrayList<>();
-        List<Entry> entriesIncome = new ArrayList<>();
 
         float sumExpenses = 0f;
-        float sumIncome = 0f;
 
         for (Transaction transaction : transactions) {
             if (transaction.type.equals("expense")) {
                 sumExpenses += transaction.amount;
                 entriesExpense.add(new Entry(transaction.date, sumExpenses));
             }
-            else {
-                sumIncome += transaction.amount;
-                entriesIncome.add(new Entry(transaction.date, sumIncome));
-            }
         }
 
         LineDataSet dataSetExpenses = new LineDataSet(entriesExpense, "Total Expenses");
-        LineDataSet dataSetIncome  = new LineDataSet(entriesIncome, "Total Income");
 
         dataSetExpenses.setColor(Color.parseColor("#FF0000"));
         dataSetExpenses.setCircleColor(Color.parseColor("#FF0000"));
-        dataSetIncome.setColor(Color.parseColor("#00FF00"));
-        dataSetIncome.setCircleColor(Color.parseColor("#00FF00"));
 
         List<ILineDataSet> dataSets = new ArrayList<>();
         if (entriesExpense.size() > 0) dataSets.add(dataSetExpenses);
-        if (entriesIncome.size() > 0) dataSets.add(dataSetIncome);
         LineData data = new LineData(dataSets);
 
         LineChart chart = rootView.findViewById(R.id.chart_line);
 
         YAxis yAxis = chart.getAxisLeft();
-        chart.getXAxis().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
         yAxis.setValueFormatter(new MyYAxisValueFormatter());
+
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setValueFormatter(new MyXAxisValueFormatter());
+        xAxis.setAxisMinimum(timestampStart - 1000);
+        xAxis.setAxisMaximum(timestampEnd + 1000);
+        xAxis.setLabelCount(3, true);
+        xAxis.setDrawGridLines(false);
 
         chart.getDescription().setEnabled(false);
         chart.setData(data);
@@ -202,15 +202,9 @@ public class SummaryFragment extends Fragment implements DatePickerDialog.OnDate
 
     public void setupPieChart() {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        float categorySum;
-        float totalSum = 0f;
 
         for (String category : ((MainActivity)getActivity()).categories) {
-            categorySum = TransactionDatabaseHelper.GetInstance().getTransactionSumByCategory("WHERE category = '" + category + "' AND TYPE = 'expense' AND date >= " + timestampStart + " AND date <= " + timestampEnd);
-            totalSum += categorySum;
-        }
-        for (String category : ((MainActivity)getActivity()).categories) {
-            categorySum = TransactionDatabaseHelper.GetInstance().getTransactionSumByCategory("WHERE category = '" + category + "' AND TYPE = 'expense' AND date >= " + timestampStart + " AND date <= " + timestampEnd);
+            float categorySum = TransactionDatabaseHelper.GetInstance().getTransactionSumByCategory("WHERE category = '" + category + "' AND TYPE = 'expense' AND date >= " + timestampStart + " AND date <= " + timestampEnd);
             if (categorySum > 0) entries.add(new PieEntry(categorySum, category));
         }
 
@@ -221,6 +215,7 @@ public class SummaryFragment extends Fragment implements DatePickerDialog.OnDate
 
         PieChart chart = rootView.findViewById(R.id.chart_pie);
         chart.getDescription().setEnabled(false);
+        chart.setTouchEnabled(false);
         chart.setData(data);
         chart.invalidate();
     }

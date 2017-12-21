@@ -2,10 +2,13 @@ package edu.ucsb.cs.cs184.jaredbjensen.ledger;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity
     public ArrayList<String> categories;
 
     TransactionDatabaseHelper dbHelper;
-    SharedPreferences preferences;
+    public SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,11 +178,28 @@ public class MainActivity extends AppCompatActivity
         dbHelper.insert("Transactions", null, values);
     }
 
-    public void clearDB(int startDate, int endDate) {
-        dbHelper.clearDB(startDate, endDate);
-    }
+    public void resetApp() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        Intent i = getBaseContext().getPackageManager()
+                                .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        finish();
+                        startActivity(i);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
 
-    public void clearDB() {
-        dbHelper.clearDB();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Clear all app data and start from scratch?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
+
+
     }
 }

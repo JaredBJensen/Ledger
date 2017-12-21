@@ -22,10 +22,12 @@ public class SetupFragment extends Fragment {
     View rootView;
     ListView listView;
     EditText editCategories;
-    Button buttonSetup;
+    Button buttonClear;
     ImageView addCategory;
 
     ArrayList<String> categories;
+
+    MainActivity activity;
 
     CategoryAdapter adapter;
 
@@ -35,9 +37,13 @@ public class SetupFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        activity = ((MainActivity)getActivity());
+
+        activity.getSupportActionBar().setTitle("Setup");
+
         listView = rootView.findViewById(R.id.list_categories);
         addCategory = rootView.findViewById(R.id.add);
-        buttonSetup = rootView.findViewById(R.id.button_setup);
+        buttonClear = rootView.findViewById(R.id.button_clear);
         editCategories = rootView.findViewById(R.id.edit_categories);
 
         categories = ((MainActivity)getActivity()).categories;
@@ -59,10 +65,12 @@ public class SetupFragment extends Fragment {
                 }
             }
         });
-        buttonSetup.setOnClickListener(new View.OnClickListener() {
+        buttonClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                activity.preferences.edit().clear().apply();
+                TransactionDatabaseHelper.GetInstance().clearDB();
+                activity.resetApp();
             }
         });
     }

@@ -24,7 +24,7 @@ import java.util.Calendar;
 public class TransactionDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
     View rootView;
-    Button confirmButton, cancelButton, dateButton, expenseButton, incomeButton;
+    Button confirmButton, cancelButton, dateButton;
     EditText editAmount, editDescription;
     Spinner category;
 
@@ -45,38 +45,10 @@ public class TransactionDialogFragment extends DialogFragment implements DatePic
         Display display = window.getWindowManager().getDefaultDisplay();
         display.getSize(dimensions);
 
-        window.setLayout((int)(dimensions.x*.85), (int)(dimensions.y*.85));
+        window.setLayout((int)(dimensions.x*.85), (int)(dimensions.y*.75));
         window.setGravity(Gravity.CENTER);
 
-        expenseButton = rootView.findViewById(R.id.button_expense);
-        incomeButton = rootView.findViewById(R.id.button_income);
-
         type = "expense";
-        expenseButton.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        expenseButton.setTextColor(Color.parseColor("#FFFFFF"));
-        incomeButton.setBackgroundColor(Color.parseColor("#EEEEEE"));
-        incomeButton.setTextColor(Color.parseColor("#000000"));
-        expenseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                expenseButton.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                expenseButton.setTextColor(Color.parseColor("#FFFFFF"));
-                incomeButton.setBackgroundColor(Color.parseColor("#EEEEEE"));
-                incomeButton.setTextColor(Color.parseColor("#000000"));
-                type = "expense";
-            }
-        });
-
-        incomeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                incomeButton.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                incomeButton.setTextColor(Color.parseColor("#FFFFFF"));
-                expenseButton.setBackgroundColor(Color.parseColor("#EEEEEE"));
-                expenseButton.setTextColor(Color.parseColor("#000000"));
-                type = "income";
-            }
-        });
 
         dateButton = rootView.findViewById(R.id.datepicker_transaction);
 
